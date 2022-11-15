@@ -41,7 +41,7 @@ public:
                  // Note that this function is not virtual, it does not depend
                  // on the static type of the instance
 
-  virtual void move(){} = 0; // todo: Animals move around, but in a different
+  //virtual void move(){} = 0; // todo: Animals move around, but in a different
                              // fashion depending on which type of animal
 };
 
@@ -72,7 +72,7 @@ private:
 public:
   ground(SDL_Surface* window_surface_ptr); // todo: Ctor
   ~ground(){}; // todo: Dtor, again for clean up (if necessary)
-  void add_animal(some argument here); // todo: Add an animal
+  //void add_animal(some argument here); // todo: Add an animal
   void update(); // todo: "refresh the screen": Move animals and draw them
   // Possibly other methods, depends on your implementation
 };
