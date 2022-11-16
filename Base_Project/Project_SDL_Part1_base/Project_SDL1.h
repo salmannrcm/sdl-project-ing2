@@ -67,6 +67,7 @@ class wolf : public animal {
 public:
   wolf(SDL_Surface* window_surface_ptr);
   ~wolf() {}
+  void move();
 };
 // Insert here:
 // class wolf, derived from animal

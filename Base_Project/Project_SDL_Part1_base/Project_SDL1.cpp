@@ -91,7 +91,6 @@ int animal::random_moove(int delimitation, POSITION targ) {
 
 //#################" sheep class implementation #########################
 
-// ---------------- sheep class impl ----------------
 sheep::sheep(SDL_Surface* window_surface_ptr)
     : animal("../media/sheep.png", window_surface_ptr) {
   this->position_.x = getRandomSpawn(POSITION::HORIZONTAL);
@@ -117,6 +116,14 @@ void sheep::move() {
   }
 }
 
+//#################" wolf class implementation #########################
+wolf::wolf(SDL_Surface* window_surface_ptr)
+    : animal("../media/wolf.png", window_surface_ptr) {
+  this->position_.x = getRandomSpawn(POSITION::HORIZONTAL);
+  this->position_.y = getRandomSpawn(POSITION::VERTICAL);
+}
+
+void::wolf::move() {}
 
 //#################" ground class implementation #########################
 
@@ -155,10 +162,10 @@ application::application(unsigned n_sheep, unsigned n_wolf) {
 
   Ground_ = std::make_unique<ground>(window_surface_ptr_);
 
-  for (size_t i = 0; i < n_sheep; i++) {
+  for (size_t i = 0; i < n_sheep; i++)
     Ground_->add_animal(std::make_shared<sheep>(window_surface_ptr_));
-  }
-  // to add same thing for wolf later on
+  for (size_t i = 0; i < n_wolf; i++)
+    Ground_->add_animal(std::make_shared<wolf>(window_surface_ptr_));
 }
 
 application::~application() {
