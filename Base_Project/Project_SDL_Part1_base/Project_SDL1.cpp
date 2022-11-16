@@ -56,6 +56,39 @@ void animal::draw() {
   SDL_BlitScaled(image_ptr_, NULL, window_surface_ptr_, &position_);
 };
 
+int animal::random_moove(int delimitation, POSITION targ) {
+  int min, max;
+  if (targ == POSITION::HORIZONTAL) {
+    if (position_.x - delimitation <= frame_boundary) {
+      min = frame_boundary;
+    } else {
+      min = position_.x - delimitation;
+    }
+
+    if (position_.x + delimitation >= frame_width - frame_boundary) {
+      max = frame_width - frame_boundary;
+    } else {
+      max = position_.x + delimitation;
+    }
+  } else {
+    if (position_.y - delimitation <= frame_boundary) {
+      min = frame_boundary;
+    } else {
+      min = position_.y - delimitation;
+    }
+
+    if (position_.y + delimitation >= frame_height - frame_boundary) {
+      max = frame_height - frame_boundary;
+    } else {
+      max = position_.y + delimitation;
+    }
+  }
+  std::random_device rand_dev;
+  std::mt19937 generator(rand_dev());
+  std::uniform_int_distribution<int> distr(min, max);
+  return distr(generator);
+}
+
 //#################" sheep class implementation #########################
 
 // ---------------- sheep class impl ----------------
@@ -63,8 +96,26 @@ sheep::sheep(SDL_Surface* window_surface_ptr)
     : animal("../media/sheep.png", window_surface_ptr) {
   this->position_.x = getRandomSpawn(POSITION::HORIZONTAL);
   this->position_.y = getRandomSpawn(POSITION::VERTICAL);
-}
+  this->targetX = random_moove(100, POSITION::HORIZONTAL);
+  this->targetY = random_moove(100, POSITION::VERTICAL);
 
+}
+void sheep::move() {
+  if (position_.x > targetX) {
+    position_.x--;
+  } else if (position_.x < targetX) {
+    position_.x++;
+  }
+  if (position_.y > targetY) {
+    position_.y--;
+  } else if (position_.y < targetY) {
+    position_.y++;
+  }
+  if (targetX == position_.x && targetY == position_.y) {
+    this->targetX = random_moove(100, POSITION::HORIZONTAL);
+    this->targetY = random_moove(100, POSITION::VERTICAL);
+  }
+}
 
 
 //#################" ground class implementation #########################
@@ -82,6 +133,7 @@ void ground::add_animal(std::shared_ptr<animal> NewAnimal) {
 
 void ground::update() {
   for (std::shared_ptr<animal> ani : animals_) {
+    ani-> move();
     ani->draw();
   }
 }

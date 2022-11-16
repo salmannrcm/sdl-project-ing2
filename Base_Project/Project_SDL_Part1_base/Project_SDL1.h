@@ -36,6 +36,7 @@ protected:
   SDL_Rect position_;
   int targetX, targetY;
   int getRandomSpawn(POSITION dir);
+  int random_moove(int delimitation, POSITION targ);
 public:
   animal(const std::string& file_path, SDL_Surface* window_surface_ptr);
   // todo: The constructor has to load the sdl_surface that corresponds to the
@@ -47,7 +48,7 @@ public:
                  // Note that this function is not virtual, it does not depend
                  // on the static type of the instance
 
-  //virtual void move(){} = 0; // todo: Animals move around, but in a different
+  virtual void move() = 0; // todo: Animals move around, but in a different
                              // fashion depending on which type of animal
 };
 
@@ -57,7 +58,7 @@ class sheep : public animal {
 public:
   sheep(SDL_Surface* window_surface_ptr);
   ~sheep() {}
-  // Ctor
+  void move();
   // Dtor
   // implement functions that are purely virtual in base class
 };
