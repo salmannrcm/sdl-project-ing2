@@ -23,6 +23,72 @@ void init() {
                              std::string(IMG_GetError()));
 }
 
+// ######################  animal class implementation #######################""
+
+  int animal::getRandomSpawn(POSITION pos) {
+  std::random_device rand_dev;
+  std::mt19937 generator(rand_dev());
+  if (pos == POSITION::HORIZONTAL) {
+    std::uniform_int_distribution<int> distr(frame_boundary,
+                                             frame_width - frame_boundary);
+    return distr(generator);
+  } else {
+    std::uniform_int_distribution<int> distr(frame_boundary,
+                                             frame_height - frame_boundary);
+    return distr(generator);
+  }
+}
+
+animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
+  image_ptr_ = IMG_Load(file_path.c_str());
+  window_surface_ptr_ = window_surface_ptr;
+  position_.x = 0;
+  position_.y = 0;
+  position_.w = image_ptr_->w;
+  position_.h = image_ptr_->h;
+
+  targetX = 0, targetY = 0;
+};
+
+animal::~animal() { SDL_FreeSurface(image_ptr_); };
+
+void animal::draw() {
+  SDL_BlitScaled(image_ptr_, NULL, window_surface_ptr_, &position_);
+};
+
+//#################" sheep class implementation #########################
+
+// ---------------- sheep class impl ----------------
+sheep::sheep(SDL_Surface* window_surface_ptr)
+    : animal("../media/sheep.png", window_surface_ptr) {
+  this->position_.x = getRandomSpawn(POSITION::HORIZONTAL);
+  this->position_.y = getRandomSpawn(POSITION::VERTICAL);
+}
+
+
+
+//#################" ground class implementation #########################
+
+ground::ground(SDL_Surface* window_surface_ptr) {
+  window_surface_ptr_ = window_surface_ptr;
+  animals_ = std::vector<std::shared_ptr<animal>>();
+}
+
+ground::~ground(){};
+
+void ground::add_animal(std::shared_ptr<animal> NewAnimal) {
+  animals_.push_back(NewAnimal);
+}
+
+void ground::update() {
+  for (std::shared_ptr<animal> ani : animals_) {
+    ani->draw();
+  }
+}
+
+//#################" application class implementation #########################
+
+
 application::application(unsigned n_sheep, unsigned n_wolf) {
   // Create an application window with the following settings:
   window_ptr_ = SDL_CreateWindow("An SDL2 window",        // window title
@@ -35,6 +101,12 @@ application::application(unsigned n_sheep, unsigned n_wolf) {
 
   window_surface_ptr_ = SDL_GetWindowSurface(window_ptr_);
 
+  Ground_ = std::make_unique<ground>(window_surface_ptr_);
+
+  for (size_t i = 0; i < n_sheep; i++) {
+    Ground_->add_animal(std::make_shared<sheep>(window_surface_ptr_));
+  }
+  // to add same thing for wolf later on
 }
 
 application::~application() {
@@ -44,7 +116,7 @@ application::~application() {
 
 int application::loop(unsigned period) {
   SDL_Rect windRect = SDL_Rect{0, 0, frame_width, frame_height};
-  
+
   while (period * 1000 >= SDL_GetTicks()) {
 
     SDL_FillRect(window_surface_ptr_, &windRect,
@@ -56,9 +128,9 @@ int application::loop(unsigned period) {
         window_event_.type == SDL_WINDOWEVENT &&
             window_event_.window.event == SDL_WINDOWEVENT_CLOSE)
       break;
-
+    Ground_->update();
     SDL_UpdateWindowSurface(window_ptr_);
-    
+
     SDL_Delay(frame_time * 1000); // Pause execution for framerate milliseconds
   }
 
@@ -75,5 +147,6 @@ SDL_Surface* load_surface_for(const std::string& path,
 
   // Helper function to load a png for a specific surface
   // See SDL_ConvertSurface
+  return NULL;
 }
 } // namespace
