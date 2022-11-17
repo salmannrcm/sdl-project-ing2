@@ -121,6 +121,10 @@ wolf::wolf(SDL_Surface* window_surface_ptr)
     : animal("../media/wolf.png", window_surface_ptr) {
   this->position_.x = getRandomSpawn(POSITION::HORIZONTAL);
   this->position_.y = getRandomSpawn(POSITION::VERTICAL);
+  this->targetX = random_moove(100,POSITION::HORIZONTAL);
+
+  this->targetY = random_moove(100,POSITION::VERTICAL);
+
 }
 
 void::wolf::move() {

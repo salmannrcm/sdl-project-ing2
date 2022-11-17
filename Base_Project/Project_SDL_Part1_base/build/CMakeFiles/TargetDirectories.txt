@@ -1,0 +1,3 @@
+/home/zak/sdl-project-ing2/Base_Project/Project_SDL_Part1_base/build/CMakeFiles/SDL_part1.dir
+/home/zak/sdl-project-ing2/Base_Project/Project_SDL_Part1_base/build/CMakeFiles/edit_cache.dir
+/home/zak/sdl-project-ing2/Base_Project/Project_SDL_Part1_base/build/CMakeFiles/rebuild_cache.dir
