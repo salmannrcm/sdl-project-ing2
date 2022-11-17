@@ -123,7 +123,22 @@ wolf::wolf(SDL_Surface* window_surface_ptr)
   this->position_.y = getRandomSpawn(POSITION::VERTICAL);
 }
 
-void::wolf::move() {}
+void::wolf::move() {
+if (position_.x > targetX) {
+    position_.x--;
+  } else if (position_.x < targetX) {
+    position_.x++;
+  }
+  if (position_.y > targetY) {
+    position_.y--;
+  } else if (position_.y < targetY) {
+    position_.y++;
+  }
+  if (targetX == position_.x && targetY == position_.y) {
+    this->targetX = random_moove(100, POSITION::HORIZONTAL);
+    this->targetY = random_moove(100, POSITION::VERTICAL);
+  }
+}
 
 //#################" ground class implementation #########################
 
