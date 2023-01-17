@@ -2,7 +2,7 @@
 //
 
 #include "Project_SDL1.h"
-
+#include <math.h>
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
@@ -89,6 +89,43 @@ int animal::random_moove(int delimitation, POSITION targ) {
   return distr(generator);
 }
 
+bool animal::isOnTarget() {
+  return (targetX - speed <= position_.x && position_.x <= targetX + speed) &&
+         (targetY - speed <= position_.y && position_.y <= targetY + speed);
+}
+
+bool animal::isOnCouple(const std::shared_ptr<animal>& secondeAni) {
+  float distance =
+      sqrt(pow(secondeAni->position_.x - this->position_.x, 2) +
+           pow(secondeAni->position_.y - this->position_.y, 2) * 1.0);
+  return distance <= (secondeAni->position_.w / 2);
+}
+
+void animal::setSpeed(int newSpeed) { this->speed = newSpeed; }
+
+void animal::runAway(const std::shared_ptr<animal>& seconde) {
+  auto degree = SDL_atan2(position_.y - seconde->position_.y,
+                          position_.x - seconde->position_.x);
+  targetX = abs(position_.x + 100 * cos(-degree * 180 / PI));
+  targetY = abs(position_.y + 100 * sin(-degree * 180 / PI));
+  if (targetX < 0) {
+    targetX = frame_boundary;
+  }
+
+  if (targetX > frame_width - position_.w) {
+    targetX = frame_width - frame_boundary;
+  }
+
+  if (targetY < 0) {
+    targetY = frame_boundary;
+  }
+
+  if (targetY > frame_height - position_.h) {
+    targetY = frame_height - frame_boundary;
+  }
+}
+
+
 //#################" sheep class implementation #########################
 
 sheep::sheep(SDL_Surface* window_surface_ptr)
@@ -152,6 +189,16 @@ ground::ground(SDL_Surface* window_surface_ptr) {
 }
 
 ground::~ground(){};
+
+unsigned ground::countSheep(unsigned nbSheep) {
+  for (auto aniIT = animals_.begin(); aniIT != animals_.end(); ++aniIT) {
+    animal& ani = *aniIT.base()->get();
+    if (typeid(ani) == typeid(sheep)) {
+      nbSheep++;
+    }
+  }
+  return nbSheep;
+}
 
 void ground::add_animal(std::shared_ptr<animal> NewAnimal) {
   animals_.push_back(NewAnimal);

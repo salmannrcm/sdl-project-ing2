@@ -2,7 +2,7 @@
 // oder projektspezifische Includedateien.
 
 #pragma once
-
+#define PI 3.14159265
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+
 
 // Defintions
 constexpr double frame_rate = 60.0; // refresh rate
@@ -33,11 +34,13 @@ private:
                            // load_surface_for
   // todo: Attribute(s) to define its position
 protected:
-  SDL_Rect position_;
+  int speed;
+  bool isOnTarget();
   int targetX, targetY;
   int getRandomSpawn(POSITION dir);
   int random_moove(int delimitation, POSITION targ);
 public:
+  SDL_Rect position_;
   animal(const std::string& file_path, SDL_Surface* window_surface_ptr);
   // todo: The constructor has to load the sdl_surface that corresponds to the
   // texture
@@ -50,6 +53,10 @@ public:
 
   virtual void move() = 0; // todo: Animals move around, but in a different
                              // fashion depending on which type of animal
+  bool isOnCouple(const std::shared_ptr<animal>&);
+  void setSpeed(int newSpeed);
+  void runAway(const std::shared_ptr<animal>&);
+
 };
 
 // Insert here:
@@ -89,7 +96,7 @@ public:
   ~ground(); //
   // Add an animal
   void add_animal(std::shared_ptr<animal> NewAnimal);
-
+  unsigned countSheep(unsigned nbSheep);
   void update(); // todo: "refresh the screen": Move animals and draw them
   // Possibly other methods, depends on your implementation
 };
