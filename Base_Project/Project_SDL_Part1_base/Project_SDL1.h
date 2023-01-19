@@ -1,18 +1,18 @@
-﻿// SDL_Test.h: Includedatei für Include-Standardsystemdateien
-// oder projektspezifische Includedateien.
+﻿#pragma once
 
-#pragma once
-#define PI 3.14159265
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include <map>
 #include <memory>
-#include <optional>
+#include <random>
 #include <vector>
 
+#define PI 3.14159265
 
 // Defintions
+constexpr int number_of_dogs = 2;
 constexpr double frame_rate = 60.0; // refresh rate
 constexpr double frame_time = 1. / frame_rate;
 constexpr unsigned frame_width = 1400; // Width of window in pixel
@@ -21,66 +21,109 @@ constexpr unsigned frame_height = 900; // Height of window in pixel
 // of the screen
 constexpr unsigned frame_boundary = 100;
 
+//constexpr unsigned max_growing = 100;
+
+constexpr unsigned seconde_to_wolf_die = 5;
+
 // Helper function to initialize SDL
 void init();
 
 enum POSITION { HORIZONTAL, VERTICAL };
 
+// ------------------------- Animal class -------------------------
 class animal {
 private:
   SDL_Surface* window_surface_ptr_; // ptr to the surface on which we want the
                                     // animal to be drawn, also non-owning
+protected:
   SDL_Surface* image_ptr_; // The texture of the sheep (the loaded image), use
                            // load_surface_for
-  // todo: Attribute(s) to define its position
-protected:
   int speed;
-  bool isOnTarget();
   int targetX, targetY;
   int getRandomSpawn(POSITION dir);
   int random_moove(int delimitation, POSITION targ);
+  int getRandomSex();
+  bool isOnTarget();
+
 public:
   SDL_Rect position_;
   animal(const std::string& file_path, SDL_Surface* window_surface_ptr);
-  // todo: The constructor has to load the sdl_surface that corresponds to the
-  // texture
-  ~animal(); // todo: Use the destructor to release memory and "clean up
-               // behind you"
+  ~animal();
 
-  void draw(); // todo: Draw the animal on the screen <-> window_surface_ptr.
-                 // Note that this function is not virtual, it does not depend
-                 // on the static type of the instance
-
-  virtual void move() = 0; // todo: Animals move around, but in a different
-                             // fashion depending on which type of animal
   bool isOnCouple(const std::shared_ptr<animal>&);
+  void draw();
   void setSpeed(int newSpeed);
   void runAway(const std::shared_ptr<animal>&);
 
+  virtual void move();
+  virtual void update();
+  // todo: Animals move around, but in a different
+  // fashion depending on which type of animal
 };
 
-// Insert here:
+// ------------------------- Sheep class -------------------------
 // class sheep, derived from animal
 class sheep : public animal {
+private:
+
 public:
+  bool isFemal;
   sheep(SDL_Surface* window_surface_ptr);
+  sheep(SDL_Surface* window_surface_ptr, int x, int y);
   ~sheep() {}
-  void move();
-  // Dtor
+  void isChild();
+  void update();
   // implement functions that are purely virtual in base class
 };
 
+// ------------------------- Wolf class -------------------------
+// class wolf, derived from animal
 class wolf : public animal {
 public:
   wolf(SDL_Surface* window_surface_ptr);
   ~wolf() {}
+  unsigned lastEatMs;
+  void setTarget(std::shared_ptr<animal>& target);
+  bool hasEat();
+  // implement functions that are purely virtual in base class
+};
+
+// ------------------------- Shepherd class -------------------------
+class shepherd {
+public:
+  SDL_Surface* window_surface_ptr_;
+  SDL_Rect position_;
+  shepherd(SDL_Surface* window_surface_ptr);
+  ~shepherd();
+  void move(const SDL_Event& event, bool keys[322]);
+
+private:
+  SDL_Surface* image_ptr_;
+};
+
+// ------------------------- Shepherd dog class -------------------------
+class shepherd_dog : public animal {
+private:
+  bool selected;
+  bool inOrder;
+  float getRandomAngle();
+
+public:
+  SDL_Surface* window_surface_ptr_;
+  std::shared_ptr<shepherd> shepherd_master;
+  SDL_Event* mouse_event;
+  float degree;
+  // variable determinating the "speed" of the dogs so they are not glued
+  // altogether
+  float degreeIncrement = getRandomAngle();
+
+  shepherd_dog(std::shared_ptr<shepherd>& master,
+               SDL_Surface* window_surface_ptr, SDL_Event& event);
+  ~shepherd_dog() {}
   void move();
 };
-// Insert here:
-// class wolf, derived from animal
-// Use only sheep at first. Once the application works
-// for sheep you can add the wolves
 
+// ------------------------- Ground class -------------------------
 // The "ground" on which all the animals live (like the std::vector
 // in the zoo example).
 class ground {
@@ -88,19 +131,28 @@ private:
   // Attention, NON-OWNING ptr, again to the screen
   SDL_Surface* window_surface_ptr_;
 
-  // Some attribute to store all the wolves and sheep
   std::vector<std::shared_ptr<animal>> animals_;
 
 public:
-  ground(SDL_Surface* window_surface_ptr); // todo: Ctor
-  ~ground(); //
+  ground(SDL_Surface* window_surface_ptr);
+  ~ground();
+
   // Add an animal
-  void add_animal(std::shared_ptr<animal> NewAnimal);
-  unsigned countSheep(unsigned nbSheep);
-  void update(); // todo: "refresh the screen": Move animals and draw them
+  void add_animal(std::shared_ptr<animal> newAnimal);
+
+  void appendOffspring(const std::shared_ptr<sheep>& first,
+                       const std::shared_ptr<sheep>& second);
+
+  // "refresh the screen": Move animals and draw them
+  void update();
+  // todo: "refresh the screen": Move animals and draw them
   // Possibly other methods, depends on your implementation
+
+  // count the number of sheeps in animals vector
+  unsigned countSheep(unsigned nbSheep);
 };
 
+// ------------------------- Application class -------------------------
 // The application class, which is in charge of generating the window
 class application {
 private:
@@ -108,17 +160,22 @@ private:
   SDL_Window* window_ptr_;
   SDL_Surface* window_surface_ptr_;
   SDL_Event window_event_;
+  SDL_Surface* score_surface_ptr_;
+  SDL_Rect score_position_;
 
-  std::unique_ptr<ground> Ground_;
+  TTF_Font* font;
+
+  std::unique_ptr<ground> ground_;
 
 public:
-  application(unsigned n_sheep, unsigned n_wolf); // Ctor
-  ~application();                                 // dtor
+  application(unsigned n_sheep, unsigned n_wolf);
+  ~application();
 
-  int loop(unsigned period); // main loop of the application.
-                             // this ensures that the screen is updated
-                             // at the correct rate.
-                             // See SDL_GetTicks() and SDL_Delay() to enforce a
-                             // duration the application should terminate after
-                             // 'period' seconds
+  int loop(unsigned period);
+  // main loop of the application.
+  // this ensures that the screen is updated
+  // at the correct rate.
+  // See SDL_GetTicks() and SDL_Delay() to enforce a
+  // duration the application should terminate after
+  // 'period' seconds
 };
