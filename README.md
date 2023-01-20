@@ -12,13 +12,13 @@ Step 1. Install SDL_ttf library which allows font rendering
 (Make sure to "sudo apt-get update" if error occurs ) 
 
 ```sh
-sudo apt-get install libsdl2--tf-dev
+sudo apt-get install libsdl2-ttf-dev
 ```
 
  Step 2. Build a /build directory under /Base_Project
  
 ```sh
-cd Base_Prroject
+cd Base_Project
 $Base_Project : mkdir build
 ```
 
